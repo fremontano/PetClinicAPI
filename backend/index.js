@@ -3,6 +3,7 @@ import dotenv from 'dotenv';
 import connection from './config/database.js';
 //routers
 import veterinario from './routes/veterinario.js';
+import paciente from './routes/paciente.js';
 
 
 const app = express();
@@ -18,6 +19,7 @@ connection();
 
 
 app.use('/api/veterinarios', veterinario);
+app.use('/api/pacientes', paciente);
 
 
 
