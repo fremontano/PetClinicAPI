@@ -16,7 +16,7 @@ app.use(express.urlencoded({ extended: true }));
 
 // Conexion a mi base de datos 
 connection();
-const dominiosPermitidos = ['http://localhost:3000'];
+const dominiosPermitidos = [process.env.FRONTEND_URL];
 
 const corsOptions = {
     origin: function (origin, callback) {
