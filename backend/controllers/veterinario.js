@@ -1,3 +1,4 @@
+import { emailOlvidePassword } from "../helpers/emailOlvidePassword.js";
 import { emailRegistro } from "../helpers/emailRegistro.js";
 import generarId from "../helpers/generarId.js";
 import generarJWT from "../helpers/generarJWT.js";
@@ -48,10 +49,11 @@ const registrar = async (req, res) => {
 
 
 const perfil = (req, res) => {
-    res.status(200).json({
-        status: 'success',
-        message: 'Ruta para obtener el perfil del perfil',
-    });
+    const { veterinario } = req;
+    if (!veterinario) {
+        return res.status(404).json({ msg: 'No se encontró el perfil del usuario' });
+    }
+    res.json(veterinario);
 };
 
 
@@ -72,6 +74,8 @@ const confirmar = async (req, res) => {
         usuario.token = false;
         usuario.confirmado = true;
         await usuario.save();
+
+
 
         res.status(200).json({
             status: 'success',
@@ -97,23 +101,26 @@ const autenticar = async (req, res) => {
         return res.status(404).json({ msg: error.message });
     }
 
-    // Comprobar si el usuario esta confirmado 
+
+    // Comprobar el password
+    const passwordCorrecto = await usuario.comprobarPassword(password);
+
+    if (!passwordCorrecto) {
+
+        const error = new Error('El Email o el Contraseña es incorrecto');
+        return res.status(401).json({ msg: error.message });
+    }
+
+
+    // Comprobar si el usuario esta confirmado
     if (!usuario.confirmado) {
-        const error = new Error('Tu Cuenta no ha sido confoirmada');
-        return res.status(404).json({ msg: error.message });
+        const error = new Error('Tu Cuenta no ha sido confirmada');
+        return res.status(403).json({ msg: error.message });
     }
 
-    //Comprobar el password
-    if (await usuario.comprobarPassword(password)) {
+    // Autenticar y generar el token
+    res.json({ token: generarJWT(usuario.id) });
 
-        //Autenticar llamar el metodo jwt
-        res.json({ token: generarJWT(usuario.id) });
-
-
-    } else {
-        const error = new Error('El Password es incorrecto');
-        return res.status(404).json({ msg: error.message });
-    }
 
 }
 
@@ -133,6 +140,15 @@ const olvidoPassword = async (req, res) => {
     try {
         existeVeterinario.token = generarId();
         await existeVeterinario.save();
+
+        //Enviar Email con intrucciones
+        emailOlvidePassword({
+            email,
+            nombre: existeVeterinario.nombre,
+            token: existeVeterinario.token
+        });
+
+
         res.status(200).json({ msg: 'Hemos enviado un email con las instrucciones' });
     } catch (error) {
         console.log(error);
@@ -140,7 +156,7 @@ const olvidoPassword = async (req, res) => {
 
 }
 
-//Olvidar password
+//comprobarToken 
 const comprobarToken = async (req, res) => {
 
     const { token } = req.params;
@@ -159,7 +175,7 @@ const comprobarToken = async (req, res) => {
 }
 
 
-//Olvidar password
+//nuevoPassword 
 const nuevoPassword = async (req, res) => {
 
     const { token } = req.params;
@@ -179,7 +195,7 @@ const nuevoPassword = async (req, res) => {
         //modificar objeto
         veterinario.password = password;
         await veterinario.save();
-        return res.status(200).json({ msg: 'Password modificado correctamente' })
+        return res.status(200).json({ msg: 'Contraseña modificado correctamente' })
         console.log(veterinario);
     } catch (error) {
         console.log(error);
