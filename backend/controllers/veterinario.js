@@ -119,7 +119,12 @@ const autenticar = async (req, res) => {
     }
 
     // Autenticar y generar el token
-    res.json({ token: generarJWT(usuario.id) });
+    res.json({
+        _id: usuario._id,
+        nombre: usuario.nombre,
+        email: usuario.email,
+        token: generarJWT(usuario.id)
+    });
 
 
 }
