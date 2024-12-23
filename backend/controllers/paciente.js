@@ -5,8 +5,15 @@ import Paciente from '../models/Pacientes.js';
 
 const agregarPaciente = async (req, res) => {
 
+    const { fechaAlta, ...datosPaciente } = req.body;
+
+    const fechaDeAlta = fechaAlta ? new Date(fechaAlta) : new Date();
+
     // Crear una nueva instancia de Paciente con los datos del cuerpo de la solicitud
-    const paciente = new Paciente(req.body);
+    const paciente = new Paciente({
+        ...datosPaciente,
+        fechaDeAlta
+    });
 
     // Asignar el veterinario autenticado al paciente
     paciente.veterinario = req.veterinario._id;

@@ -1,5 +1,5 @@
 import express from 'express';
-import { perfil, registrar, confirmar, autenticar, olvidoPassword, comprobarToken, nuevoPassword } from '../controllers/veterinario.js';
+import { perfil, registrar, confirmar, autenticar, olvidoPassword, comprobarToken, nuevoPassword, actualizarPerfil } from '../controllers/veterinario.js';
 import checkAuth from '../middleware/authMiddleware.js';
 
 const router = express.Router();
@@ -14,8 +14,10 @@ router.post('/olvido-password', olvidoPassword);
 router.route('/olvido-password/:token').get(comprobarToken).post(nuevoPassword);
 
 
+
 // Rutas protegidas 
 router.get('/perfil', checkAuth, perfil);
+router.put('/perfil/:id', checkAuth, actualizarPerfil)
 
 
 

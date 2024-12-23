@@ -10,7 +10,7 @@ import paciente from './routes/paciente.js';
 const app = express();
 dotenv.config();
 
-// Recibir datos del body 
+// Recibir datos del body       
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 

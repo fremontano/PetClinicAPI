@@ -56,6 +56,40 @@ const perfil = (req, res) => {
     res.json(veterinario);
 };
 
+//actualizar perfil
+const actualizarPerfil = async (req, res) => {
+    const veterinario = await Veterinario.findById(req.params.id);
+
+    if (!veterinario) {
+        const error = new Error("Hubo un Error");
+        return res.status(400).json({ msg: error.message });
+    }
+
+    const { email } = req.body;
+
+    // Verificar si el email existe en la base de datos
+    if (veterinario.email !== email) {
+        const existeEmail = await Veterinario.findOne({ email });
+        if (existeEmail) {
+            const error = new Error("Ese email ya está en uso");
+            return res.status(400).json({ msg: error.message });
+        }
+    }
+
+    try {
+        veterinario.nombre = req.body.nombre || veterinario.nombre;
+        veterinario.email = req.body.email || veterinario.email;
+        veterinario.web = req.body.web || veterinario.web;
+        veterinario.telefono = req.body.telefono || veterinario.telefono;
+
+        const veterinarioActualizado = await veterinario.save();
+        res.json(veterinarioActualizado);
+    } catch (error) {
+        console.log(error);
+        res.status(500).json({ msg: "Error al actualizar el perfil" });
+    }
+};
+
 
 
 //Confirmar por token personalizado 
@@ -217,6 +251,7 @@ const nuevoPassword = async (req, res) => {
 export {
     registrar,
     perfil,
+    actualizarPerfil,
     confirmar,
     autenticar,
     olvidoPassword,
