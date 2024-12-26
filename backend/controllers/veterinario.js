@@ -228,7 +228,6 @@ const nuevoPassword = async (req, res) => {
         return res.status(400).json({ msg: error.message });
     }
 
-
     try {
         veterinario.token = null;
         //modificar objeto
@@ -240,12 +239,40 @@ const nuevoPassword = async (req, res) => {
         console.log(error);
     }
 
-
     res.status(200).json({
         message: 'Ruta nuevoPassword'
     })
 
 }
+
+// Actualizar Password 
+const actualizarPassword = async (req, res) => {
+    const { id } = req.veterinario;
+    const { currentPassword, newPassword } = req.body;
+
+    try {
+        const veterinario = await Veterinario.findById(id);
+        if (!veterinario) {
+            return res.status(400).json({ msg: 'Veterinario no encontrado' });
+        }
+
+        const passwordCorrecto = await veterinario.comprobarPassword(currentPassword);
+
+        if (!passwordCorrecto) {
+            return res.status(400).json({ msg: 'Contraseña actual incorrecta' });
+        }
+
+        veterinario.password = newPassword;
+        await veterinario.save();
+
+        res.json({ msg: 'Contraseña actualizada correctamente' });
+
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ msg: 'Hubo un error en el servidor' });
+    }
+};
+
 
 
 export {
@@ -256,5 +283,6 @@ export {
     autenticar,
     olvidoPassword,
     comprobarToken,
-    nuevoPassword
+    nuevoPassword,
+    actualizarPassword
 };
